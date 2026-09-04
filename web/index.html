@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letterboxd Hottest Takes</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔥 Letterboxd Hottest Takes</h1>
+  <p class="subtitle">Find the films where you disagreed hardest with everyone else</p>
+
+  <section class="panel">
+    <h2>How it works</h2>
+    <p>
+      This tool compares <strong>your</strong> Letterboxd ratings against each film's
+      <strong>Letterboxd community average</strong>, then ranks your biggest disagreements —
+      your hottest takes. Your export is only used in your browser session to run this
+      comparison — it fetches each film's average rating from Letterboxd and isn't stored
+      anywhere afterward.
+    </p>
+    <h2>Step 1 — export your data</h2>
+    <ol>
+      <li>Log into <a href="https://letterboxd.com" target="_blank">letterboxd.com</a></li>
+      <li>Go to <strong>Settings → Data</strong></li>
+      <li>Click <strong>Export your data</strong> — this downloads a <code>.zip</code> file</li>
+    </ol>
+    <h2>Step 2 — upload it below</h2>
+    <p>You can drop the <code>.zip</code> exactly as downloaded, or just the <code>ratings.csv</code> file from inside it.</p>
+  </section>
+
+  <section class="panel">
+    <div class="drop" id="dropZone">
+      <div>📂 Click to choose a file, or drag it here</div>
+      <div style="font-size:0.8em; margin-top:6px;">.zip export or ratings.csv</div>
+      <div class="filename" id="filename"></div>
+      <input type="file" id="fileInput" accept=".zip,.csv">
+    </div>
+
+    <div class="options">
+      <label>Show top (each direction)
+        <input type="number" id="topN" value="10" min="1" max="100">
+      </label>
+    </div>
+
+    <button class="primary" id="startBtn" disabled>Find my hottest takes</button>
+  </section>
+
+  <section class="panel" id="progressPanel">
+    <h2>Fetching average ratings…</h2>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div class="progress-stats">
+      <span id="progressCount">0 / 0</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div id="log"></div>
+  </section>
+
+  <section class="panel" id="errorPanel">
+    <div class="error-box" id="errorBox"></div>
+  </section>
+
+  <section class="panel" id="resultsPanel">
+    <h2 id="resultsTitle">Your hottest takes</h2>
+
+    <h3 class="section-label">🔥 Films you overrated</h3>
+    <div id="overratedCards"></div>
+
+    <h3 class="section-label">🧊 Films you underrated</h3>
+    <div id="underratedCards"></div>
+
+    <details class="skipped" id="skippedBox">
+      <summary></summary>
+      <div class="skipped-list"></div>
+    </details>
+
+    <details class="skipped" id="failedBox">
+      <summary></summary>
+      <div class="skipped-list"></div>
+    </details>
+
+    <div class="actions">
+      <button class="secondary" id="downloadCsvBtn">Download full comparison (CSV)</button>
+      <button class="secondary" id="startOverBtn">Start over</button>
+    </div>
+  </section>
+
+  <footer>Film data &amp; ratings © Letterboxd</footer>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/parser.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

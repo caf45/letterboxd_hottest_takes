@@ -1,0 +1,74 @@
+PUBLISHING VIA VERCEL — no card, no terminal
+================================================
+
+Vercel's free "Hobby" tier genuinely requires no credit card, and if you
+somehow ever exceeded its (very generous, way more than this app needs)
+limits, it just pauses for a bit rather than charging you anything. This
+replaces the Render/PythonAnywhere attempts -- Vercel doesn't restrict
+outbound internet access the way PythonAnywhere's free tier does, so it
+can actually reach Letterboxd.
+
+You already have a GitHub repo from the Render attempt -- we'll fix it and
+reuse it rather than starting over.
+
+STEP 1 — Fix your GitHub repo's structure
+--------------------------------------------
+Your repo currently has files flattened at the root instead of inside a
+"web" folder. Easiest fix: delete the repo and start clean.
+
+1. On your repo's page, go to Settings (the repo's own Settings tab, near
+   the top) -> scroll to the bottom -> "Delete this repository" -> confirm.
+2. Create it again at https://github.com/new with the same name.
+3. Click "Add file" -> "Upload files".
+4. Drag in app.py, requirements.txt, and .python-version individually.
+5. For the frontend: drag the whole "web" folder ICON itself (straight
+   from your file explorer, without opening it first) into the drop zone
+   -- that's what preserves it as a real subfolder instead of flattening
+   it. You should see paths like "web/index.html" and "web/js/api.js"
+   appear in the upload preview before you commit.
+6. Click "Commit changes".
+
+Your repo should now look like:
+   app.py
+   requirements.txt
+   .python-version
+   web/
+     index.html
+     style.css
+     js/
+       api.js
+       app.js
+       parser.js
+       ui.js
+
+(Note: this project no longer uses flask_app.py or a Procfile -- those
+were for the Render/PythonAnywhere attempts. If either is still in your
+repo from before, delete them, though it won't break anything if you
+forget.)
+
+STEP 2 — Connect it to Vercel
+---------------------------------
+1. Go to https://vercel.com and click "Sign Up" -> "Continue with GitHub".
+   No card is asked for anywhere in this flow.
+2. Click "Add New..." -> "Project".
+3. Find your repo in the list and click "Import".
+4. Vercel should auto-detect it as a Python project. Leave the default
+   settings as they are -- this app needs no custom build configuration.
+5. Click "Deploy".
+
+Vercel will build and deploy it -- usually well under a minute. When it's
+done, you'll get a live URL like https://hottest-takes.vercel.app -- open
+it, and you should see the same page you tested locally.
+
+That's it. Anyone with that link can now use the site, no install, no
+terminal, ever -- for you or for them.
+
+Updating it later: edit files on GitHub (or re-upload changed ones) and
+commit. Vercel automatically rebuilds and redeploys on every commit.
+
+If something goes wrong at Step 2
+------------------------------------
+Click into the failed deployment on Vercel's dashboard and open the
+"Build Logs" -- copy whatever error text is in there and send it over.
+Unlike Render's proxy errors or PythonAnywhere's silent block, Vercel's
+build logs are usually specific enough to fix directly from the message.

@@ -1,0 +1,33 @@
+TEST IT LOCALLY BEFORE PUBLISHING
+====================================
+
+Worth doing once before you deploy -- runs the exact same code that would
+go live, just on your own machine first, so you can catch any problem
+before other people would see it.
+
+1. Make sure you have Python 3 (check with: python3 --version)
+
+2. Open a terminal, navigate into this folder, and install the dependencies:
+   python3 -m pip install -r requirements.txt
+
+3. Run it:
+   python3 app.py
+
+   You should see it print something like:
+   " * Running on http://127.0.0.1:5000"
+
+4. Open that address (http://127.0.0.1:5000) in your browser. You should
+   see the upload page.
+
+5. Upload your ratings.csv or export zip and click "Find my hottest takes"
+   -- this is the real test, since it's your machine's real internet
+   connection actually reaching Letterboxd.
+
+If something goes wrong, check two places:
+   - The browser: press F12 (or right-click -> Inspect) and look at the
+     "Console" tab for a red error message.
+   - The terminal window where app.py is running: Flask prints any
+     server-side error there, including the full Python traceback.
+
+Copy-paste whatever text you find in either place -- that's what actually
+lets a problem get fixed, rather than guessed at.
