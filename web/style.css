@@ -21,12 +21,9 @@ h1 {
   font-size: 2.2em;
   text-align: center;
   margin-bottom: 4px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--accent);
 }
-.subtitle { text-align: center; color: var(--muted); margin-bottom: 36px; }
+.subtitle { text-align: center; color: var(--muted); margin-bottom: 36px; font-size: 1.15em; }
 section.panel {
   background: var(--card);
   border: 1px solid var(--border);
