@@ -14,7 +14,6 @@ const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 const filenameEl = document.getElementById('filename');
 const startBtn = document.getElementById('startBtn');
-const topNInput = document.getElementById('topN');
 const downloadCsvBtn = document.getElementById('downloadCsvBtn');
 const startOverBtn = document.getElementById('startOverBtn');
 
@@ -68,13 +67,20 @@ async function processAll(rows, concurrency, onProgress) {
   return results;
 }
 
-function buildCsv(compared) {
-  const header = ['Name', 'Year', 'Your Rating', 'Average Rating', 'Difference', 'URL'];
+function buildCsv(allResults) {
+  const header = ['Name', 'Year', 'Your Rating', 'Average Rating', 'Difference', 'Status', 'URL'];
   const lines = [header.join(',')];
-  compared.forEach(r => {
+  allResults.forEach(r => {
     const url = r.finalUrl || r.row['Letterboxd URI'];
-    const vals = [r.row['Name'], r.row['Year'], r.userRating, r.avg, r.diff, url]
-      .map(v => `"${String(v).replace(/"/g, '""')}"`);
+    const vals = [
+      r.row['Name'],
+      r.row['Year'],
+      r.userRating ?? r.row['Rating'],
+      r.avg ?? '',
+      r.diff ?? '',
+      r.status,
+      url,
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`);
     lines.push(vals.join(','));
   });
   return lines.join('\n');
@@ -93,8 +99,8 @@ startBtn.addEventListener('click', async () => {
     const rows = parseRatingsCsv(csvText);
     if (!rows.length) throw new Error('No rated films found in that file.');
 
-    const topN = Math.max(1, parseInt(topNInput.value) || 10);
-    const halfN = Math.max(1, Math.round(topN / 2));
+    // Always shows 10 total: the 5 most overrated and 5 most underrated.
+    const halfN = 5;
 
     log(`Found ${rows.length} rated films. Fetching Letterboxd averages (${CONCURRENCY} at a time)…`);
 
@@ -108,22 +114,25 @@ startBtn.addEventListener('click', async () => {
       if (r.avg !== null) {
         const userRating = parseFloat(r.row['Rating']);
         const diff = Math.round((userRating - r.avg) * 100) / 100;
-        const entry = { ...r, userRating, diff };
+        const entry = { ...r, userRating, diff, status: 'compared' };
         if (diff > 0) overrated.push(entry);
         else if (diff < 0) underrated.push(entry);
-        // diff === 0 (exact match with the crowd) isn't a "take" either way, so it's excluded from both lists.
+        else overrated.push(entry); // diff === 0: no lean either way, still a real comparison -- keep it in the CSV
       } else if (r.reason === 'insufficient-ratings') {
-        skipped.push(r);
+        skipped.push({ ...r, status: 'insufficient-ratings (fewer than 50 Letterboxd ratings)' });
       } else {
-        failed.push(r);
+        failed.push({ ...r, status: `fetch failed (${r.detail || r.reason || 'unknown error'})` });
       }
     });
     overrated.sort((a, b) => b.diff - a.diff);
     underrated.sort((a, b) => a.diff - b.diff);
-    lastFullResults = [...overrated, ...underrated].sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+    // The CSV gets every film that was in the export, tagged with why it's
+    // missing numbers where that applies -- the on-page cards still only
+    // show the two top-5 lists, which don't need diff === 0 entries.
+    lastFullResults = [...overrated, ...underrated, ...skipped, ...failed];
 
     document.getElementById('progressPanel').style.display = 'none';
-    renderResults(overrated, underrated, skipped, failed, halfN);
+    renderResults(overrated.filter(r => r.diff > 0), underrated, skipped, failed, halfN);
   } catch (e) {
     document.getElementById('progressPanel').style.display = 'none';
     showError('Something went wrong: ' + e.message);
