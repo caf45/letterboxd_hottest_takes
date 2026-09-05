@@ -1,18 +1,38 @@
 // parser.js
-// Reading the user's uploaded export. (Extracting the average rating from a
-// Letterboxd page now happens server-side in server.py, not here.)
+// Reading the user's uploaded Letterboxd export .zip. (Extracting the
+// average rating from a Letterboxd page happens server-side in app.py, not
+// here.)
 
 async function extractRatingsCsvText(file) {
-  if (file.name.toLowerCase().endsWith('.csv')) {
-    return await file.text();
+  if (!file.name.toLowerCase().endsWith('.zip')) {
+    throw new Error('Please upload the .zip file exported from Letterboxd (Settings → Data → Export your data).');
   }
+
   const zip = await JSZip.loadAsync(file);
-  let entry = null;
   const seenPaths = [];
   zip.forEach((relPath, f) => {
     if (!f.dir) seenPaths.push(relPath);
-    if (!entry && /(^|\/)ratings\.csv$/i.test(relPath)) entry = f;
   });
+
+  // Prefer the real top-level ratings.csv. Letterboxd's export can also
+  // include a "deleted/ratings.csv" (previously-deleted ratings) -- picking
+  // that up by mistake instead of the real one would silently produce a
+  // smaller, wrong film count. zip.file('ratings.csv') is an exact-path
+  // lookup, so it can only match the genuine top-level file, never a
+  // nested one.
+  let entry = zip.file('ratings.csv');
+
+  if (!entry) {
+    // No top-level ratings.csv -- fall back to a nested one, but never one
+    // under "deleted/", and prefer the shallowest match if there's more
+    // than one.
+    const candidates = seenPaths
+      .filter(p => /(^|\/)ratings\.csv$/i.test(p) && !/^deleted\//i.test(p))
+      .sort((a, b) => a.split('/').length - b.split('/').length);
+    const path = candidates[0];
+    if (path) entry = zip.file(path);
+  }
+
   if (!entry) {
     const preview = seenPaths.slice(0, 8).join(', ') || '(no files found in the zip at all)';
     throw new Error(
