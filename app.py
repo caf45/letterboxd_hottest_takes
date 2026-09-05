@@ -27,6 +27,17 @@ REQUEST_HEADERS = {
     )
 }
 
+# A plain requests.get() call opens a brand-new TCP+TLS connection every
+# single time. Since every request here goes to the same host (Letterboxd),
+# a shared Session with a connection pool lets those connections be reused
+# instead -- avoiding a repeated handshake for every one of the ~200 films
+# in a typical export. pool_maxsize is set above our own concurrency so
+# concurrent requests never have to wait for a free connection in the pool.
+SESSION = requests.Session()
+_ADAPTER = requests.adapters.HTTPAdapter(pool_connections=20, pool_maxsize=20)
+SESSION.mount("https://", _ADAPTER)
+SESSION.mount("http://", _ADAPTER)
+
 # Letterboxd only publishes a community "weighted average" once a film has at
 # least 50 member ratings. When it exists, it's in the page's <head> as a
 # twitter-card meta tag, e.g.: <meta name="twitter:data2" content="4.39 out of 5">
@@ -39,7 +50,7 @@ FILM_PAGE_RE = re.compile(r'property=["\']og:type["\']\s+content=["\']video\.mov
 def fetch_rating(url):
     """Fetch a Letterboxd film page directly and pull out its average rating."""
     try:
-        resp = requests.get(url, headers=REQUEST_HEADERS, timeout=15)
+        resp = SESSION.get(url, headers=REQUEST_HEADERS, timeout=15)
     except requests.RequestException as e:
         return {"error": f"network error: {e}"}
 
@@ -77,5 +88,9 @@ def api_rating():
 
 if __name__ == "__main__":
     # Only used if you run this directly for local testing
-    # (python3 flask_app.py) -- the hosting platform runs it differently.
-    app.run(debug=True)
+    # (python3 app.py) -- the hosting platform runs it differently.
+    # threaded=True matters here: without it, Flask's dev server handles
+    # one request at a time, which quietly serializes all those "parallel"
+    # fetches the browser sends and makes it look much slower than it needs
+    # to be.
+    app.run(debug=True, threaded=True)
