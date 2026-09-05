@@ -11,16 +11,16 @@
 <body>
 <div class="wrap">
   <h1>🔥 Letterboxd Hottest Takes</h1>
-  <p class="subtitle">Find the films where you disagreed hardest with everyone else</p>
+  <p class="subtitle">Find the films where you disagreed the most with everyone else</p>
 
   <section class="panel">
     <h2>How it works</h2>
     <p>
       This tool compares <strong>your</strong> Letterboxd ratings against each film's
-      <strong>Letterboxd community average</strong>, then ranks your biggest disagreements —
-      your hottest takes. Your export is only used in your browser session to run this
-      comparison — it fetches each film's average rating from Letterboxd and isn't stored
-      anywhere afterward.
+      community average to get your hottest takes. It shows your top 10  —
+      the 5 films you most underrated and the 5 you most overrated compared to everyone
+      else. To run this comparison, your export is only used in your browser session and
+      isn't stored anywhere afterward.
     </p>
     <h2>Step 1 — export your data</h2>
     <ol>
@@ -29,21 +29,14 @@
       <li>Click <strong>Export your data</strong> — this downloads a <code>.zip</code> file</li>
     </ol>
     <h2>Step 2 — upload it below</h2>
-    <p>You can drop the <code>.zip</code> exactly as downloaded, or just the <code>ratings.csv</code> file from inside it.</p>
+    <p>Drop the <code>.zip</code> exactly as downloaded from Letterboxd.</p>
   </section>
 
   <section class="panel">
     <div class="drop" id="dropZone">
-      <div>📂 Click to choose a file, or drag it here</div>
-      <div style="font-size:0.8em; margin-top:6px;">.zip export or ratings.csv</div>
+      <div>📂 Click to choose your Letterboxd export .zip, or drag it here</div>
       <div class="filename" id="filename"></div>
-      <input type="file" id="fileInput" accept=".zip,.csv">
-    </div>
-
-    <div class="options">
-      <label>Show top (each direction)
-        <input type="number" id="topN" value="10" min="1" max="100">
-      </label>
+      <input type="file" id="fileInput" accept=".zip">
     </div>
 
     <button class="primary" id="startBtn" disabled>Find my hottest takes</button>
